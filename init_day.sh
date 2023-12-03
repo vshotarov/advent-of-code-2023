@@ -51,7 +51,8 @@ echo "Example input:" &&
 example_input=$(</dev/stdin) &&
 echo "Using AOC_COOKIE to query for real input..:" &&
 aoc_cookie=`cat AOC_COOKIE`
-real_input=`curl --cookie "session=$aoc_cookie" https://adventofcode.com/2023/day/$1/input` &&
+user_agent="github.com/vshotarov/advent-of-code-2023 by vshotarov@gmail.com"
+real_input=`curl --cookie "session=$aoc_cookie" --user-agent "$user_agent" https://adventofcode.com/2023/day/$1/input` &&
 echo "Successfully curld"
 touch "$name/Main.hs" "$name/example_input.txt" "$name/input.txt" &&
 echo "$example_input" > "$name/example_input.txt" &&
