@@ -12,9 +12,14 @@ main = do
     putStrLn $ "Parsed input: " ++ (Common.truncateString $ show parsedInput)
 
     -- Solve
-    let getWinningOptions (t,d) = filter (>d) $ getOptions t
+    let closedForm :: (Int,Int) -> [Int]
+        closedForm (t,d) = let det = sqrt $ fromIntegral (t^2 - 4*d)
+                               x1 = (fromIntegral (t) - det) / 2
+                               x2 = (fromIntegral (t) + det) / 2
+                            in [(ceiling x1)..((floor x2))]
+    let bruteForce (t,d) = filter (>d) $ getOptions t
             where getOptions x = map (\i -> (x-i) * i) [0..x]
-    let solve = product . map length . map getWinningOptions
+    let solve = product . map length . map closedForm
     let answer1 = solve parsedInput
     let concatNumber :: [Int] -> Int
         concatNumber ns = read . concat $ map show ns
