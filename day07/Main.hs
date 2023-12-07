@@ -2,7 +2,7 @@ module Main where
 
 import qualified Common
 import qualified Data.Map as M
-import Data.List (sortBy)
+import Data.List (sortBy, sort)
 
 main :: IO ()
 main = do
@@ -38,34 +38,43 @@ parse input = map parseOne $ lines input
 
 score1 :: Hand -> Int
 score1 cards =
-    let cardCounts = foldr (\x -> M.insertWith (+) x 1) M.empty cards
-     in case M.elems cardCounts of
-          [_] -> 7
-          [a,b] -> (max a b) + 2
-          ns | length ns == 3 -> if elem 3 ns then 4 else 3
-             | length ns == 4 -> 2
-             | otherwise -> 1
+    let cardCounts = sort . M.elems
+                   $ foldr (\x -> M.insertWith (+) x 1) M.empty cards :: [Int]
+     in case cardCounts of
+          [5]       -> 7
+          [1,4]     -> 6
+          [2,3]     -> 5
+          [1,1,3]   -> 4
+          [1,2,2]   -> 3
+          [1,1,1,2] -> 2
+          _         -> 1
 
 score2 :: Hand -> Int
 score2 cards =
     let cm = foldr (\x -> M.insertWith (+) x 1) M.empty cards
+        cardCounts = sort $ M.elems cm :: [Int]
         js = M.findWithDefault 0 'J' cm 
-        hasJ = js /= 0
-     in case M.elems cm of
-          [_] -> 7
-          [a,b] | hasJ -> 7
-                | otherwise -> (max a b) + 2
-          ns@[_,_,_] | elem 3 ns -> if hasJ then 6 else 4
-                     | hasJ -> 4 + js
-                     | otherwise -> 3
-          [_,_,_,_] -> if hasJ then 4 else 2
-          _ -> if hasJ then 2 else 1
+     in case cardCounts of
+          [5]                   -> 7
+          [1,4]     | js /= 0   -> 7
+                    | otherwise -> 6
+          [2,3]     | js /= 0   -> 7
+                    | otherwise -> 5
+          [1,1,3]   | js /= 0   -> 6
+                    | otherwise -> 4
+          [1,2,2]   | js == 2   -> 6
+                    | js == 1   -> 5
+                    | otherwise -> 3
+          [1,1,1,2] | js /= 0   -> 4
+                    | otherwise -> 2
+          _         | js /=0    -> 2
+                    | otherwise -> 1
 
 play :: (Hand -> Int) -> SingleCardScore -> Hand -> Hand -> Ordering
-play score cardStrengths a b =
+play score strengths a b =
     let (a_score,b_score) = (score a, score b)
      in case compare a_score b_score of
           EQ  -> Common.firstWhere (/=EQ)
-               $ map (uncurry compare)
-               $ zip (map (cardStrengths M.!) a) (map (cardStrengths M.!) b)
+               . map (uncurry compare . Common.mapTuple (strengths M.!))
+               $ zip a b
           res -> res
