@@ -9,6 +9,7 @@ module Common ( readInput
               , unique
               , splitOnceOn
               , mapModify
+              , mapTuple
               ) where
 
 import System.Environment (getArgs, getProgName)
@@ -89,3 +90,6 @@ splitOnceOn delimiter xs = case go [] xs of
 
 mapModify :: Ord a => a -> (b -> b) -> M.Map a b -> M.Map a b
 mapModify k f m = M.insert k (f $ m M.! k) m
+
+mapTuple :: (a -> b) -> (a, a) -> (b, b)
+mapTuple f (a1, a2) = (f a1, f a2)
