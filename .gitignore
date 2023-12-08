@@ -2,4 +2,4 @@
 *.swp
 dist-newstyle/
 AOC_COOKIE
-*/*input.txt
+*/*input*.txt
